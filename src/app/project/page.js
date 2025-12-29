@@ -178,13 +178,13 @@ export default function ProjectPage() {
             </header>
             
             {/* Search Bar */}
-            <div className="flex flex-wrap justify-between items-center my-4 gap-2">
+            <div className="flex flex-wrap justify-between items-center gap-4 mt-4">
                 <input
                     type="search"
                     placeholder="Search by Project Name, Status, or Assigner..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full max-w-2xl p-2 px-4 text-base text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    className="flex-grow p-2 px-4 border rounded-lg shadow-sm"
                 />
             </div>
 

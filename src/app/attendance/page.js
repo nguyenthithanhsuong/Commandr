@@ -260,13 +260,13 @@ export default function AttendancePage() {
       </header>
 
       {/* SEARCH + FILTER */}
-      <div className="flex flex-wrap justify-between items-center my-4 gap-2">
+      <div className="flex flex-wrap justify-between items-center gap-4 mt-4">
         <input
           type="search"
           placeholder="Search by Name or Status..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:max-w-lg p-2 px-4 border rounded-lg shadow-sm"
+          className="flex-grow p-2 px-4 border rounded-lg shadow-sm"
         />
 
         <div className="flex gap-2">

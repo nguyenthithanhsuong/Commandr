@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// npx playwright test tests/signin.spec.js
+// npx playwright test tests/signin.spec.js --headed --project=firefox --timeout=60000
 
 test.describe('Sign-in Page Tests', () => {
 
@@ -16,7 +16,7 @@ test.describe('Sign-in Page Tests', () => {
   }
 
   // -------------------------------------------------------
-  test('Admin sign-in redirects to /personnel', async ({ page }) => {
+  test('TC-SignIn-001: Admin sign-in redirects to /personnel', async ({ page }) => {
     page.on('dialog', async dialog => dialog.accept());
 
     await page.goto('http://localhost:3000/signin');
@@ -34,11 +34,11 @@ test.describe('Sign-in Page Tests', () => {
 
     console.log('API response received:', apiResponse.status());
 
-    await page.waitForURL('**/personnel', { timeout: 15000 });
+    await page.waitForURL('**/personnel');
   });
 
   // -------------------------------------------------------
-  test('Valid user redirects to /personal', async ({ page }) => {
+  test('TC-SignIn-002: Valid user redirects to /personal', async ({ page }) => {
     page.on('dialog', async dialog => dialog.accept());
 
     await page.goto('http://localhost:3000/signin');
@@ -56,11 +56,11 @@ test.describe('Sign-in Page Tests', () => {
 
     console.log('Auth:', apiResponse.status());
 
-    await page.waitForURL('**/personal', { timeout: 15000 });
+    await page.waitForURL('**/personal');
   });
 
   // -------------------------------------------------------
-  test('Wrong credentials alerts "Invalid email or password."', async ({ page }) => {
+  test('TC-SignIn-003: Wrong credentials alerts "Invalid email or password."', async ({ page }) => {
     const getAlert = await captureAlert(page);
 
     await page.goto('http://localhost:3000/signin');
@@ -74,7 +74,7 @@ test.describe('Sign-in Page Tests', () => {
   });
 
   // -------------------------------------------------------
-  test('Blank password alerts "Password cannot be blank!"', async ({ page }) => {
+  test('TC-SignIn-004: Blank password alerts "Password cannot be blank!"', async ({ page }) => {
     const getAlert = await captureAlert(page);
 
     await page.goto('http://localhost:3000/signin');
@@ -88,7 +88,7 @@ test.describe('Sign-in Page Tests', () => {
   });
 
   // -------------------------------------------------------
-  test('Blank email alerts "Email cannot be blank!"', async ({ page }) => {
+  test('TC-SignIn-005: Blank email alerts "Email cannot be blank!"', async ({ page }) => {
     const getAlert = await captureAlert(page);
 
     await page.goto('http://localhost:3000/signin');
@@ -102,7 +102,7 @@ test.describe('Sign-in Page Tests', () => {
   });
 
   // -------------------------------------------------------
-  test('Blank both fields alerts "Email cannot be blank!"', async ({ page }) => {
+  test('TC-SignIn-006: Blank both fields alerts "Email cannot be blank!"', async ({ page }) => {
     const getAlert = await captureAlert(page);
 
     await page.goto('http://localhost:3000/signin');

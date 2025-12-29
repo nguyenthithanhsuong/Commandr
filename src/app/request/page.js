@@ -235,13 +235,13 @@ const handleDelete = async (req) => {
                   </header>
                   
                   {/* Search Bar */}
-                  <div className="flex justify-center mt-4 mb-4">
+                  <div className="flex flex-wrap justify-between items-center gap-4 mt-4">
                       <input
                           type="search"
                           placeholder="Search by Requester, Approver, Or Status..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full max-w-2xl p-2 px-4 text-base text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                          className="flex-grow p-2 px-4 border rounded-lg shadow-sm"
                       />
                   </div>
                 

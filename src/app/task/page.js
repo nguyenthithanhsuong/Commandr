@@ -194,13 +194,13 @@ export default function TaskPage() {
             </header>
 
             {/* SEARCH */}
-            <div className="flex flex-wrap justify-between items-center my-4 gap-2">
+            <div className="flex flex-wrap justify-between items-center gap-4 mt-4">
                 <input
                     type="search"
                     placeholder="Search By Task Name, Personnel or Assigner..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full max-w-2xl p-2 px-4 border rounded-lg shadow-sm"
+                    className="flex-grow p-2 px-4 border rounded-lg shadow-sm"
                 />
             </div>
 

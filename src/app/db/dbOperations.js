@@ -452,7 +452,7 @@ export async function addPersonnel(id, data) {
             console.error("Account creation failed:", accountError);
 
             // Rollback personnel insertion
-            await db.execute(`DELETE FROM personnel WHERE PersonnelID = ?`, [newPersonnelId]);
+            await db.execute(`DELETE FROM personnel WHERE UserID = ?`, [newPersonnelId]);
 
             return { success: false, error: "Failed to add account, personnel rollback executed." };
         }

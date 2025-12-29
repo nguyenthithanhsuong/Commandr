@@ -465,13 +465,13 @@ export default function DepartmentPage() {
             </header>
             
             {/* Search Bar (omitted for brevity) */}
-            <div className="flex flex-col items-center mt-4 mb-6">
+            <div className="flex flex-wrap justify-between items-center gap-4 mt-4">
                 <input
                     type="search"
                     placeholder="Search by Position or Department Name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-grow w-full md:max-w-md p-2 px-4 text-base text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    className="flex-grow p-2 px-4 border rounded-lg shadow-sm"
                 />
             </div>
 
