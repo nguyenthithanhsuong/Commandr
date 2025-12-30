@@ -12,6 +12,7 @@ export default function DepartmentPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [openDepartments, setOpenDepartments] = useState({});
     const [AssignerID, setAssignerID] = useState(null);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
     // State for Add Department
     const [showAddDepartmentInput, setShowAddDepartmentInput] = useState(false);
@@ -77,8 +78,9 @@ export default function DepartmentPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    operation: 'getPosition', 
-                    params: { } 
+                    operation: 'getPosition',
+                    // Pass data=1 so backend returns all positions (not just accessid 4)
+                    params: { data: '1' }
                 }),
             });
             const data = await response.json();
@@ -167,34 +169,70 @@ export default function DepartmentPage() {
 
     // Group and Filter Logic 
     const groupedDepartments = useMemo(() => {
-        let currentPositions = positions;
-
-        if (searchTerm) {
-            const lowerCaseSearch = searchTerm.toLowerCase();
-            currentPositions = currentPositions.filter(pos =>
-                pos.positionname.toLowerCase().includes(lowerCaseSearch) ||
-                pos.departmentname.toLowerCase().includes(lowerCaseSearch)
-            );
-        }
-
+        // Start with all departments, even those with zero positions
         const departmentsMap = new Map();
-        currentPositions.forEach(pos => {
-            const deptName = pos.departmentname || 'Unassigned';
-            const deptId = pos.departmentid !== undefined && pos.departmentid !== null ? pos.departmentid : null; 
-            
-            if (!departmentsMap.has(deptName)) {
-                departmentsMap.set(deptName, {
-                    departmentname: deptName,
-                    // Only assign deptId if it's not 'Unassigned'
-                    departmentid: deptName !== 'Unassigned' ? deptId : null, 
-                    positions: []
-                });
-            }
-            departmentsMap.get(deptName).positions.push(pos);
+        (DepartmentList || []).forEach(dept => {
+            const key = dept.departmentid ?? dept.departmentname;
+            departmentsMap.set(key, {
+                departmentname: dept.departmentname,
+                departmentid: dept.departmentid ?? null,
+                positions: [],
+            });
         });
 
-        return Array.from(departmentsMap.values());
-    }, [positions, searchTerm]);
+        // Add positions to their departments (or Unassigned)
+        positions.forEach(pos => {
+            const deptName = pos.departmentname || 'Unassigned';
+            const deptId = pos.departmentid !== undefined && pos.departmentid !== null ? pos.departmentid : null;
+            const key = deptId ?? deptName;
+
+            if (!departmentsMap.has(key)) {
+                departmentsMap.set(key, {
+                    departmentname: deptName,
+                    departmentid: deptId,
+                    positions: [],
+                });
+            }
+            departmentsMap.get(key).positions.push(pos);
+        });
+
+        let result = Array.from(departmentsMap.values());
+
+        if (searchTerm) {
+            const lower = searchTerm.toLowerCase();
+            result = result.filter(dept => {
+                const deptMatch = (dept.departmentname || '').toLowerCase().includes(lower);
+                const positionMatch = dept.positions.some(pos =>
+                    pos.positionname.toLowerCase().includes(lower)
+                );
+                return deptMatch || positionMatch;
+            });
+        }
+
+        if (sortConfig.key) {
+            const dir = sortConfig.direction === 'asc' ? 1 : -1;
+            result.sort((a, b) => {
+                const aVal = sortConfig.key === 'positions' ? a.positions.length : (a[sortConfig.key] || '');
+                const bVal = sortConfig.key === 'positions' ? b.positions.length : (b[sortConfig.key] || '');
+                const aNorm = typeof aVal === 'string' ? aVal.toLowerCase() : aVal;
+                const bNorm = typeof bVal === 'string' ? bVal.toLowerCase() : bVal;
+                if (aNorm < bNorm) return -1 * dir;
+                if (aNorm > bNorm) return 1 * dir;
+                return 0;
+            });
+        }
+
+        return result;
+    }, [positions, searchTerm, DepartmentList, sortConfig]);
+
+    const toggleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
 
     // --- API Handlers (Create) ---
 
@@ -594,8 +632,20 @@ export default function DepartmentPage() {
                 <table className="min-w-full divide-y divide-gray-300">
                     <thead>
                         <tr className="bg-gray-100">
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Department</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">Total Positions / Position Name / Base Salary</th>
+                            <th
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4 cursor-pointer select-none"
+                                onClick={() => toggleSort('departmentname')}
+                            >
+                                Department
+                                {sortConfig.key === 'departmentname' ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                            </th>
+                            <th
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2 cursor-pointer select-none"
+                                onClick={() => toggleSort('positions')}
+                            >
+                                Total Positions / Position Name / Base Salary
+                                {sortConfig.key === 'positions' ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                            </th>
                             {authorization.isadmin == 1 && (<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Actions</th>)}
                         </tr>
                     </thead>

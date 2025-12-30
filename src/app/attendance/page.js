@@ -12,6 +12,7 @@ export default function AttendancePage() {
   const [assignerID, setAssignerID] = useState(null);
   const [authorization, setAuthorization] = useState(null);
   const [showTodayOnly, setShowTodayOnly] = useState(true);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   // ⛔ Prevent flicker
   const [pageReady, setPageReady] = useState(false);
@@ -213,6 +214,34 @@ export default function AttendancePage() {
     return list;
   }, [attendanceList, searchTerm, showTodayOnly]);
 
+  const sortedAttendance = useMemo(() => {
+    if (!sortConfig.key) return filteredAttendance;
+    const dir = sortConfig.direction === 'asc' ? 1 : -1;
+    const normalize = (val) => {
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'string') return val.toLowerCase();
+      return val;
+    };
+    const copy = [...filteredAttendance];
+    copy.sort((a, b) => {
+      const aVal = normalize(a[sortConfig.key]);
+      const bVal = normalize(b[sortConfig.key]);
+      if (aVal < bVal) return -1 * dir;
+      if (aVal > bVal) return 1 * dir;
+      return 0;
+    });
+    return copy;
+  }, [filteredAttendance, sortConfig]);
+
+  const toggleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
   // -------------------------------------------------------------
   // BLOCK RENDER UNTIL READY (NO FLICKER)
   // -------------------------------------------------------------
@@ -304,12 +333,23 @@ export default function AttendancePage() {
         <table className="min-w-full divide-y divide-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check-In Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check-In Time</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check-Out Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check-Out Time</th>
+              {[
+                { label: 'Date', key: 'AttendanceDate' },
+                { label: 'Name', key: 'Name' },
+                { label: 'Check-In Status', key: 'CheckInStatus' },
+                { label: 'Check-In Time', key: 'CheckInDateTime' },
+                { label: 'Check-Out Status', key: 'CheckOutStatus' },
+                { label: 'Check-Out Time', key: 'CheckOutDateTime' },
+              ].map(col => (
+                <th
+                  key={col.key}
+                  onClick={() => toggleSort(col.key)}
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer select-none"
+                >
+                  {col.label}
+                  {sortConfig.key === col.key ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
+              ))}
               {authorization.attendancepermission == 1 && (
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
               )}
@@ -317,7 +357,7 @@ export default function AttendancePage() {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredAttendance.map((record) => (
+            {sortedAttendance.map((record) => (
               <tr key={`${record.UserID}-${record.AttendanceDate}`} className="hover:bg-blue-50">
                 <td className="px-6 py-4 text-sm text-gray-700">
                   {formatDate(record.AttendanceDate)}

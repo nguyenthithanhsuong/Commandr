@@ -11,6 +11,7 @@ export default function TaskPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [tasks, setTasks] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
     const [AssignerID, setAssignerID] = useState(null);
 
@@ -141,6 +142,34 @@ export default function TaskPage() {
         );
     }, [tasks, searchTerm]);
 
+    const sortedTasks = useMemo(() => {
+        if (!sortConfig.key) return filteredTasks;
+        const dir = sortConfig.direction === 'asc' ? 1 : -1;
+        const normalize = (val) => {
+            if (val === null || val === undefined) return '';
+            if (typeof val === 'string') return val.toLowerCase();
+            return val;
+        };
+        const copy = [...filteredTasks];
+        copy.sort((a, b) => {
+            const aVal = normalize(a[sortConfig.key]);
+            const bVal = normalize(b[sortConfig.key]);
+            if (aVal < bVal) return -1 * dir;
+            if (aVal > bVal) return 1 * dir;
+            return 0;
+        });
+        return copy;
+    }, [filteredTasks, sortConfig]);
+
+    const toggleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
+
     const handleRowClick = (task) => {
         router.push(`/task/viewtask?id=${task.taskid}`);
     };
@@ -223,29 +252,31 @@ export default function TaskPage() {
                 <table className="min-w-full divide-y divide-gray-300">
                     <thead className="bg-gray-100">
                         <tr>
-                            {[
-                                "Task ID",
-                                "Task Name",
-                                "Status",
-                                "Project",
-                                "Assigned To",
-                                "Assigner",
-                                "Creation Date",
-                                "End Date",
-                                "Description",
-                            ].map((h) => (
+                            {[ 
+                                { label: "Task ID", key: "taskid" },
+                                { label: "Task Name", key: "taskname" },
+                                { label: "Status", key: "taskstatus" },
+                                { label: "Project", key: "projectname" },
+                                { label: "Assigned To", key: "personnelname" },
+                                { label: "Assigner", key: "assignername" },
+                                { label: "Creation Date", key: "creationdate" },
+                                { label: "End Date", key: "enddate" },
+                                { label: "Description", key: "description" },
+                            ].map((col) => (
                                 <th
-                                    key={h}
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                    key={col.key}
+                                    onClick={() => toggleSort(col.key)}
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer select-none"
                                 >
-                                    {h}
+                                    {col.label}
+                                    {sortConfig.key === col.key ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
                                 </th>
                             ))}
                         </tr>
                     </thead>
 
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredTasks.map((task) => (
+                        {sortedTasks.map((task) => (
                             <tr
                                 key={task.taskid}
                                 onClick={() => handleRowClick(task)}

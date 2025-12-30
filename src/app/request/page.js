@@ -12,6 +12,7 @@ export default function RequestPage() {
   const [isManageMode, setIsManageMode] = useState(false); // ✅ NEW STATE
   const [isDeleteMode, setisDeleteMode] = useState(false);
   const [AssignerID, setAssignerID] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
     const NavLink = ({ name, href }) => {
         const isActive = router.pathname === href || (name === 'Personnel' && router.pathname === '/personnel');
         
@@ -113,6 +114,34 @@ export default function RequestPage() {
         r.approvername?.toLowerCase().includes(lower)
     );
   }, [Requests, searchTerm]);
+
+  const sortedRequests = useMemo(() => {
+    if (!sortConfig.key) return filteredRequests;
+    const dir = sortConfig.direction === 'asc' ? 1 : -1;
+    const normalize = (val) => {
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'string') return val.toLowerCase();
+      return val;
+    };
+    const copy = [...filteredRequests];
+    copy.sort((a, b) => {
+      const aVal = normalize(a[sortConfig.key]);
+      const bVal = normalize(b[sortConfig.key]);
+      if (aVal < bVal) return -1 * dir;
+      if (aVal > bVal) return 1 * dir;
+      return 0;
+    });
+    return copy;
+  }, [filteredRequests, sortConfig]);
+
+  const toggleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
 
   const handleRowClick = (Request) => {};
 
@@ -281,12 +310,23 @@ const handleDelete = async (req) => {
         <table className="min-w-full divide-y divide-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approver</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creation Date</th>
+              {[
+                { label: 'Requester', key: 'requestername' },
+                { label: 'Approver', key: 'approvername' },
+                { label: 'Type', key: 'type' },
+                { label: 'Status', key: 'requeststatus' },
+                { label: 'Description', key: 'description' },
+                { label: 'Creation Date', key: 'creationdate' },
+              ].map(col => (
+                <th
+                  key={col.key}
+                  onClick={() => toggleSort(col.key)}
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                >
+                  {col.label}
+                  {sortConfig.key === col.key ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
+              ))}
               {isManageMode && (
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -300,7 +340,7 @@ const handleDelete = async (req) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredRequests.map((Request) => (
+            {sortedRequests.map((Request) => (
               <tr
                 key={Request.requestid}
                 onClick={() => !isManageMode && handleRowClick(Request)}

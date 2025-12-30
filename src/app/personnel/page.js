@@ -25,6 +25,7 @@ export default function PersonnelPage() {
     const [AssignerID, setAssignerID] = useState('');
     const [personnel, setPersonnel] = useState('');
     const [showInactive, setShowInactive] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
     const [attendance, setAttendance] = useState('');
     const [notification, setNotification] = useState('');
@@ -275,6 +276,35 @@ export default function PersonnelPage() {
         );
     }, [users, searchTerm, showInactive]);
 
+    const sortedUsers = useMemo(() => {
+        if (!sortConfig.key) return filteredUsers;
+        const dir = sortConfig.direction === 'asc' ? 1 : -1;
+        const normalize = (val) => {
+            if (val === null || val === undefined) return '';
+            if (typeof val === 'string') return val.toLowerCase();
+            if (typeof val === 'boolean') return val ? 1 : 0;
+            return val;
+        };
+        const keyed = [...filteredUsers];
+        keyed.sort((a, b) => {
+            const aVal = normalize(a[sortConfig.key]);
+            const bVal = normalize(b[sortConfig.key]);
+            if (aVal < bVal) return -1 * dir;
+            if (aVal > bVal) return 1 * dir;
+            return 0;
+        });
+        return keyed;
+    }, [filteredUsers, sortConfig]);
+
+    const toggleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
+
     const handleRowClick = (user) => {
         router.push(`/personnel/viewpersonnel?id=${user.userid}`);
     };
@@ -435,29 +465,31 @@ export default function PersonnelPage() {
                     <thead className="bg-gray-100">
                         <tr>
                             {[
-                                "UserID",
-                                "Name",
-                                "DateOfBirth",
-                                "Gender",
-                                "Phone",
-                                "Position",
-                                "Department",
-                                "EmployDate",
-                                "Manager",
-                                "Status",
-                            ].map((h) => (
+                                { label: "UserID", key: "userid" },
+                                { label: "Name", key: "name" },
+                                { label: "DateOfBirth", key: "dateofbirth" },
+                                { label: "Gender", key: "gender" },
+                                { label: "Phone", key: "phonenumber" },
+                                { label: "Position", key: "position" },
+                                { label: "Department", key: "department" },
+                                { label: "EmployDate", key: "employdate" },
+                                { label: "Manager", key: "managername" },
+                                { label: "Status", key: "isactive" },
+                            ].map((col) => (
                                 <th
-                                    key={h}
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                    key={col.key}
+                                    onClick={() => toggleSort(col.key)}
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer select-none"
                                 >
-                                    {h}
+                                    {col.label}
+                                    {sortConfig.key === col.key ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
                                 </th>
                             ))}
                         </tr>
                     </thead>
 
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredUsers.map((u) => (
+                        {sortedUsers.map((u) => (
                             <tr
                                 key={u.userid}
                                 onClick={() => handleRowClick(u)}

@@ -26,8 +26,7 @@ export default function SignInPage() {
     }
   };
 
-  useEffect(() => {
-    generateAttendance();   // 👈 runs when page loads
+  useEffect(() => {  // 👈 runs when page loads
   }, []);
     //button click handle
     const handleSubmit = async (e) => {
