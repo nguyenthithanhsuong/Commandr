@@ -349,12 +349,12 @@ export default function PersonnelPage() {
             
             <div className="flex items-center space-x-3">
                     {/* NEW NOTIFICATION BUTTON */}
-                    <button
+                   {false && (<button
                         onClick={() => setShowNotifications(!showNotifications)}
                         className="text-white border border-white px-3 py-1 rounded-md hover:bg-white hover:text-black"
                     >
                         Notifications
-                    </button>
+                    </button>)}
 
                     <Button
                         text="Sign Out"
@@ -375,7 +375,7 @@ export default function PersonnelPage() {
             </header>
 
             <h1 className="text-3xl font-extrabold text-gray-800 mt-6 mb-6 flex items-center">
-                                <span className="bg-blue-600 text-white rounded-full h-10 w-10 flex items-center justify-center mr-3">
+                                <span className="bg-black text-white rounded-full h-10 w-10 flex items-center justify-center mr-3">
                                     {firstInitial}
                                 </span>
                                 {personnel.name? personnel.name : "Unnamed Personnel"}
