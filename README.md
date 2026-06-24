@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Commandr
 
-## Getting Started
+A full-stack HR and project management platform for managing personnel, attendance, departments, projects, tasks, requests, and reporting.
 
-First, run the development server:
+**Frontend** built with Next.js (App Router) and JavaScript
+**Backend** powered by a direct MySQL connection via custom DB layer
+**Testing** via Playwright (end-to-end)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | Next.js, React, JavaScript |
+| **Styling** | CSS Modules |
+| **API** | Next.js App Router, REST |
+| **Authentication** | Custom (session-based, cookie check) |
+| **Database** | MySQL via custom DB layer |
+| **Testing** | Playwright (end-to-end) |
+
+---
+
+## Project Structure
+
+```
+Commandr/
+├── src/app/
+│   ├── api/                  # REST API routes
+│   │   ├── auth/             # Auth check and signout
+│   │   └── personnel/        # Personnel API
+│   ├── attendance/           # Attendance module
+│   ├── department/           # Department module
+│   ├── personnel/            # Personnel (add, update, view)
+│   ├── project/              # Project (add, update, view)
+│   ├── task/                 # Task (add, update, view)
+│   ├── request/              # Request module
+│   ├── report/               # Report module
+│   ├── signin/               # Authentication
+│   ├── components/           # Shared UI components
+│   └── db/                   # Database connection and operations
+├── tests/                    # Playwright e2e tests
+├── public/                   # Static assets
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Local Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Install dependencies
+npm install
 
-## Learn More
+# Start development server
+npm run dev   # Port 3000
 
-To learn more about Next.js, take a look at the following resources:
+# Build for production
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment Variables
 
-## Deploy on Vercel
+Create `.env` in the project root:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Required — database connection
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Build Output
+
+Routes inferred from the app structure:
+
+| Module | Routes |
+|---|---|
+| Auth | `/signin`, `/api/auth/check`, `/api/auth/signout` |
+| Personnel | `/personnel`, `/personnel/addpersonnel`, `/personnel/updatepersonnel`, `/personnel/viewpersonnel`, `/api/personnel` |
+| Attendance | `/attendance` |
+| Department | `/department` |
+| Project | `/project`, `/project/addproject`, `/project/updateproject`, `/project/viewproject` |
+| Task | `/task`, `/task/addtask`, `/task/updatetask`, `/task/viewtask` |
+| Request | `/request`, `/request/addrequest` |
+| Report | `/report` |
+
+---
+
+## Security
+
+- Authentication: Custom session check via `/api/auth/check` on protected routes
+- Signout: Server-side session invalidation via `/api/auth/signout`
+- Database: Operations isolated in a dedicated DB layer (`db.js`, `dbOperations.js`)
+
+---
+
+## Testing
+
+Playwright end-to-end tests cover all major modules.
+
+```bash
+# Run all tests
+npx playwright test
+
+# Run a specific module
+npx playwright test tests/signin.spec.js
+npx playwright test tests/personnel.spec.js
+
+# View last test report
+npx playwright show-report
+```
+
+Tested modules: signin, personnel, attendance, department, project, task, request, report.
+
+---
+
+## Contributing
+
+1. Create a feature branch: `git checkout -b feature/my-feature`
+2. Make changes and validate: `npm run build`
+3. Run tests: `npx playwright test`
+4. Push branch: `git push origin feature/my-feature`
+5. Create a Pull Request
